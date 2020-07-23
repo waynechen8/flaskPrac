@@ -43,7 +43,7 @@ def test_author_required(app, client, auth):
 ))
 def test_exists_required(client, auth, path):
     auth.login()
-    assert client.post(path.status_code == 404
+    assert client.post(path).status_code == 404
 
 def test_create(client, auth, app):
     auth.login()
@@ -52,7 +52,7 @@ def test_create(client, auth, app):
     
     with app.app_context():
         db = get_db()
-        count = db.execute('SELCT COUNT(id) FROM post ').fetchone()[0]
+        count = db.execute('SELECT COUNT(id) FROM post ').fetchone()[0]
         assert count == 2
         
 def test_update(client, auth, app):
@@ -66,16 +66,10 @@ def test_update(client, auth, app):
         assert post['title'] == 'updated'
 
 @pytest.mark.parametrize('path', (
-    'created',
+    'create',
     '/1/update',
 ))
 def test_create_update_validate(client, auth, path):
     auth.login()
-    response = client.post('/1/delete')
-    assert response.headers['Location'] == 'http://localhost/'
-
-    with app.app_context():
-        db = get_db()
-        post = db.execute('SELECT * FROM post WHERE id = 1').fetchone()
-        assert post is None
-
+    response = client.post(path, data={'title': '', 'body': ''})
+    assert b'Title is required.' in response.data

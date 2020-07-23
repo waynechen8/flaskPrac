@@ -17,7 +17,7 @@ def app():
         'DATABASE': db_path,
     })
 
-    wuth app.app_context():
+    with app.app_context():
         init_db()
         get_db().executescript(_data_sql)
 
